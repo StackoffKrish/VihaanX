@@ -32,6 +32,10 @@ cd apps/rider && npx expo start --web
 
 If running more than one at once, Expo will prompt to use a different port; alternatively pass `--port 8082` or `--port 8083` for the additional apps. For a clean cache, append `--clear`.
 
+### Kirana or Rider shows plain text with no styles
+
+The three apps share one hoisted `node_modules` and, by default, one Metro transform cache. Without a per-app cache key, the app bundled first leaks its route folder and `global.css` into the others, so NativeWind never runs for them and the screens render unstyled. Each `metro.config.js` therefore sets `config.cacheVersion` to the app's package name; keep that line when editing the Metro config. If an app still looks unstyled after pulling, start it once with `--clear`.
+
 ## Type checking
 
 ```sh
