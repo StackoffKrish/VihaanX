@@ -10,6 +10,6 @@ const queryClient = new QueryClient();
 export default function RootLayout() {
   const [loaded, error] = useFonts({ Inter_400Regular, NotoSansDevanagari_400Regular });
   if (!loaded && !error) return <View style={{ flex: 1, backgroundColor: Theme.colors.cream }} />;
-  if (error) return <View><Text>Unable to load fonts.</Text></View>;
+  if (error) return <View className="flex-1 items-center justify-center bg-[#FFF8E7] px-6"><Text className="text-center text-base font-bold text-[#0F3D2E]">Unable to load fonts.</Text></View>;
   return <QueryClientProvider client={queryClient}><Stack screenOptions={{ headerShown: false }} /></QueryClientProvider>;
 }
