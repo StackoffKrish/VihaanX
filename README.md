@@ -1,4 +1,4 @@
-# Mohalla Mart
+# Fast Kart
 
 Kirana Pay Later for Saket, Delhi. This is **Step 1: skeleton only**: all data and actions are mock placeholders. There is no backend, Supabase, Mapbox, Gemini or payments integration.
 
