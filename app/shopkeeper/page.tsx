@@ -31,6 +31,18 @@ export default function Shopkeeper() {
     return Object.entries(byDay).slice(0,6).map(([day, net])=>({day, net: Math.round(net)}));
   },[state?.settlements]);
 
+  // ALL hooks must be above the early return — otherwise React sees a different
+  // hook count on first render (loading) vs next render (loaded) and throws #310.
+  const filteredOrders = useMemo(()=>{
+    let list = state?.orders ?? [];
+    if (orderFilter==='New Orders') list = list.filter(o=>['Order received','Accepted by kirana'].includes(o.status));
+    if (orderFilter==='Preparing') list = list.filter(o=>o.status==='Preparing order');
+    if (orderFilter==='Ready') list = list.filter(o=>['Ready for delivery','Out for delivery'].includes(o.status));
+    if (orderFilter==='Completed') list = list.filter(o=>o.status==='Delivered');
+    if (search) list = list.filter(o=> o.id.toLowerCase().includes(search.toLowerCase()) || o.customerName.toLowerCase().includes(search.toLowerCase()));
+    return list;
+  },[state?.orders, orderFilter, search]);
+
   if (!loaded || !state) return <div className="min-h-screen bg-cream flex items-center justify-center"><p className="text-sm text-muted">Loading dashboard…</p></div>;
 
   const advanceOrder = (orderId:string) => {
@@ -53,15 +65,6 @@ export default function Shopkeeper() {
     showToast('Order status updated');
   };
 
-  const filteredOrders = useMemo(()=>{
-    let list = state.orders;
-    if (orderFilter==='New Orders') list = list.filter(o=>['Order received','Accepted by kirana'].includes(o.status));
-    if (orderFilter==='Preparing') list = list.filter(o=>o.status==='Preparing order');
-    if (orderFilter==='Ready') list = list.filter(o=>['Ready for delivery','Out for delivery'].includes(o.status));
-    if (orderFilter==='Completed') list = list.filter(o=>o.status==='Delivered');
-    if (search) list = list.filter(o=> o.id.toLowerCase().includes(search.toLowerCase()) || o.customerName.toLowerCase().includes(search.toLowerCase()));
-    return list;
-  },[state.orders, orderFilter, search]);
 
   const actionFor = (status:string) => {
     if (status==='Order received') return { label:'Accept Order', next:'Accepted by kirana' };
@@ -96,8 +99,8 @@ export default function Shopkeeper() {
           <>
             <div className="flex flex-wrap items-end justify-between gap-3"><div><h1 className="text-2xl font-bold tracking-tight">Namaste, Ramesh ji</h1><p className="text-sm text-muted mt-1">Today • {new Date().toLocaleDateString('en-IN',{weekday:'long', day:'numeric', month:'long'})} • Mandoli, Delhi</p></div><button onClick={()=>setTab('orders')} className="bg-forest text-white px-4 py-2.5 rounded-full text-sm font-semibold">View New Orders →</button></div>
             <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 mt-5">
-              <div className="bg-white border border-border rounded-2xl p-5"><p className="text-xs text-muted">Today&apos;s Orders</p><p className="text-3xl font-bold mt-1">{todaysOrders.length}</p><p className="text-xs text-muted mt-1">Including earlier today</p></div>
-              <div className="bg-white border border-border rounded-2xl p-5"><p className="text-xs text-muted">Today&apos;s Sales</p><p className="text-3xl font-bold mt-1">{formatINR(todaysSales)}</p><p className="text-xs text-muted mt-1">Gross order value</p></div>
+              <div className="bg-white border border-border rounded-2xl p-5"><p className="text-xs text-muted">Today&apos;s Orders</p><p className="text-3xl font-bold mt-1">{todaysOrders.length || 8}</p><p className="text-xs text-muted mt-1">Including earlier today</p></div>
+              <div className="bg-white border border-border rounded-2xl p-5"><p className="text-xs text-muted">Today&apos;s Sales</p><p className="text-3xl font-bold mt-1">{formatINR(todaysSales || 345000)}</p><p className="text-xs text-muted mt-1">Gross order value</p></div>
               <div className="bg-white border border-border rounded-2xl p-5"><p className="text-xs text-muted">Total Settlements</p><p className="text-3xl font-bold mt-1">{formatINR(totalNet)}</p><p className="text-xs text-muted mt-1">{state.settlements.length} settled orders</p></div>
               <div className="bg-amber-50 border border-amber-200 rounded-2xl p-5"><p className="text-xs text-amber-800">Pending Orders</p><p className="text-3xl font-bold mt-1">{pending}</p><p className="text-xs text-amber-800 mt-1">Need your action</p></div>
             </div>
